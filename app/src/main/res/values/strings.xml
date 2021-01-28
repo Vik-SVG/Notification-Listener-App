@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Notification Listener App</string>
+    <string name="service_label">Notification Listener Service</string>
+    <string name="notification_listener_service">Configure service settings</string>
+    <string name="alert_dialog_explanation_on">Service is curently enabled. Do you want do disable it?</string>
+    <string name="alert_dialog_explanation_off">Service is not working right now. Do you want to enable it?</string>
+    <string name="stop_btn_string">Stop</string>
+    <string name="start_btn_string">Start</string>
+    <string name="no_notifications_yet_message">There\'s no notifications yet</string>
+    <string name="notification_image_description_string">Notification Image</string>
+</resources>
