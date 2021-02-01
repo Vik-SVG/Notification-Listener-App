@@ -4,7 +4,6 @@ import android.app.Application
 import com.vkpriesniakov.notificationlistenerapp.di.myDatabaseModules
 import com.vkpriesniakov.notificationlistenerapp.di.repositoryModule
 import com.vkpriesniakov.notificationlistenerapp.di.viewModelModule
-
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin

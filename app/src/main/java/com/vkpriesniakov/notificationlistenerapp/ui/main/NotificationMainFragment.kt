@@ -7,13 +7,11 @@ import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import com.vkpriesniakov.notificationlistenerapp.R
 import com.vkpriesniakov.notificationlistenerapp.databinding.MainFragmentBinding
-import com.vkpriesniakov.notificationlistenerapp.utils.PostActivityContract
-import com.vkpriesniakov.notificationlistenerapp.utils.isServiceEnabled
-import com.vkpriesniakov.notificationlistenerapp.utils.showServiceDialog
+import com.vkpriesniakov.notificationlistenerapp.utils.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+
 
 class NotificationMainFragment : Fragment() {
 
@@ -31,6 +29,8 @@ class NotificationMainFragment : Fragment() {
     private var _binding: MainFragmentBinding? = null
     private var isServiceEnabled: Boolean? = null
 
+    private lateinit var mPopup:CustomPopup
+
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val bdn get() = _binding!!
@@ -41,8 +41,14 @@ class NotificationMainFragment : Fragment() {
     ): View {
         _binding = MainFragmentBinding.inflate(inflater, container, false)
         val view = bdn.root
+
+       mPopup = CustomPopup(inflater, bdn.rvMain).also {
+           it setPopupListeners context as Context
+       }
+
         setHasOptionsMenu(true)
-        (activity as AppCompatActivity?)!!.supportActionBar?.elevation = 0f
+
+        ((activity as AppCompatActivity)).setSupportActionBar(bdn.includeAppbar.myToolbar)
 
         return view
     }
@@ -67,12 +73,14 @@ class NotificationMainFragment : Fragment() {
 
 
     private fun setupStartButton() {
-        bdn.btnStart.setOnClickListener {
 
+        bdn.btnStart.setOnClickListener {
             showServiceDialog(
-               context =  requireContext(),
-               openPostActivityCustom = openPostActivityCustom)
+                context = requireContext(),
+                openPostActivityCustom = openPostActivityCustom
+            )
         }
+
     }
 
     private fun updateUi() {
@@ -85,8 +93,21 @@ class NotificationMainFragment : Fragment() {
         }
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+       return when(item.itemId){
+           R.id.settings_menu -> {
+               mPopup.showPopup()
+               return true
+           }
+            else ->{
+                super.onOptionsItemSelected(item)
+            }
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.menu_main, menu)
+        inflater.inflate(R.menu.app_bar_menu, menu)
     }
 
 }

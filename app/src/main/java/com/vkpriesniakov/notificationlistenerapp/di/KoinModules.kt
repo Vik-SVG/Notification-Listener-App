@@ -1,6 +1,6 @@
 package com.vkpriesniakov.notificationlistenerapp.di
 
-import android.app.Application
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.vkpriesniakov.notificationlistenerapp.persistence.AppDatabase
 import com.vkpriesniakov.notificationlistenerapp.persistence.NotificationDao
@@ -8,14 +8,14 @@ import com.vkpriesniakov.notificationlistenerapp.ui.main.NotificationMainReposit
 import com.vkpriesniakov.notificationlistenerapp.ui.main.NotificationMainViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import kotlin.math.sin
 
 
 val myDatabaseModules = module {
 
-    fun provideAppDatabase(application: Application): AppDatabase {
-        return AppDatabase.getInstance(application)
+    fun provideAppDatabase(context: Context): AppDatabase {
+        return AppDatabase.getInstance(context)
     }
 
     fun provideNotificationsDao(appDatabase: AppDatabase): NotificationDao {

@@ -1,5 +1,7 @@
 package com.vkpriesniakov.notificationlistenerapp.utils
 
+import android.animation.ArgbEvaluator
+import android.animation.ValueAnimator
 import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Context
@@ -8,11 +10,15 @@ import android.graphics.drawable.Drawable
 import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
+import android.view.View
+import android.view.WindowManager
+import android.widget.PopupWindow
 import androidx.activity.result.ActivityResultLauncher
 import com.vkpriesniakov.notificationlistenerapp.R
 import java.text.Format
 import java.text.SimpleDateFormat
 import java.util.*
+
 
 private const val TAG = "UtilsProvider"
 
@@ -70,4 +76,17 @@ fun isServiceEnabled(context: Context): Boolean {
 
     fun getNotificationIcon(context: Context, packageName: String): Drawable {
         return context.packageManager.getApplicationIcon(packageName)
+    }
+
+
+    fun setAnimatedBackground(context: Context, view:View){
+
+        val colorFrom: Int = context.resources.getColor(R.color.white)
+        val colorTo: Int = context.resources.getColor(R.color.darker_grey)
+        val colorAnimation = ValueAnimator.ofObject(ArgbEvaluator(), colorFrom, colorTo)
+        colorAnimation.duration = 250 // milliseconds
+
+        colorAnimation.addUpdateListener { animator -> view.setBackgroundColor(animator.animatedValue as Int) }
+        colorAnimation.start()
+
     }

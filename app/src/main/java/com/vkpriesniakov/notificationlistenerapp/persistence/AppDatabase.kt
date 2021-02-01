@@ -2,7 +2,6 @@ package com.vkpriesniakov.notificationlistenerapp.persistence
 
 import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
 import com.vkpriesniakov.notificationlistenerapp.model.MyNotification

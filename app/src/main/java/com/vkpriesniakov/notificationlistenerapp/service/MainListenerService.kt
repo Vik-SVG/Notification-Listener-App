@@ -1,16 +1,15 @@
 package com.vkpriesniakov.notificationlistenerapp.service
 
 import android.app.Notification
-import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
-import com.vkpriesniakov.notificationlistenerapp.model.MyNotification
-import com.vkpriesniakov.notificationlistenerapp.persistence.AppDatabase
-import com.vkpriesniakov.notificationlistenerapp.persistence.NotificationDao
-import org.koin.android.ext.android.inject
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import java.lang.ref.WeakReference
 
 
 class MainListenerService : NotificationListenerService() {
@@ -18,27 +17,40 @@ class MainListenerService : NotificationListenerService() {
     private val TAG = "MyNotificationListener"
 
 
-    override fun onNotificationPosted(sbn: StatusBarNotification?) {
+    override fun onNotificationPosted(sbn: StatusBarNotification) {
 
-        val mDao:NotificationDao by inject()
+        Log.i(TAG, "Got ID ${sbn.id}")
 
-        //   to send intent
-        Log.i(TAG, "Received ID " + sbn!!.id)
+        //TODO: memory leaks spotted. Require refactoring
 
-        //TODO: enable Notification transition to Room
+        startWorker(sbn)
 
-        val myNotification = MyNotification( 0,
-            sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE).toString(),
-            sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT).toString(),
-            sbn.packageName,
-            sbn.postTime)
+    }
 
-      //  val appContext:Context = application
-       // val db = AppDatabase.getInstance(appContext)
-        //val ntfDao = db.notificationDao()
+    private fun startWorker(sbn: StatusBarNotification) {
 
-        mDao.insertNotification(myNotification)
+        val title = WeakReference(sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE).toString())
+        val text = WeakReference(sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT).toString())
+        val pckName = WeakReference(sbn.packageName)
+        val date = WeakReference(sbn.postTime)
 
+        val builder = Data.Builder().also {
+            it.putString("title", title.get())
+            it.putString("text", text.get())
+            it.putString("pack", pckName.get())
+            it.putLong("date", date.get()!!)
+        }
+
+        val workManager = WorkManager.getInstance(this)
+        val workRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+            .setInputData(builder.build())
+            .build()
+        workManager.enqueue(workRequest)
+
+        title.clear()
+        text.clear()
+        pckName.clear()
+        date.clear()
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {
