@@ -1,21 +1,34 @@
 package com.vkpriesniakov.notificationlistenerapp.ui.main
 
 import androidx.lifecycle.*
+import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes
+import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes.*
+import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes.Companion.getEnumFilterType
 import com.vkpriesniakov.notificationlistenerapp.model.MyNotification
 import com.vkpriesniakov.notificationlistenerapp.utils.FILTER_TYPES_KEY
+import com.vkpriesniakov.notificationlistenerapp.utils.HOUR_SEC
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
 class NotificationMainViewModel (private val notificationRepo:NotificationMainRepository,
                                  private val state: SavedStateHandle
                                  ): ViewModel() {
 
+    private val filterType: MutableStateFlow<Int> = MutableStateFlow(
+        state.get<Int>(FILTER_TYPES_KEY)?:0 //  TODO:Filter getFromSPref
+    )
 
-    val allNotifications:LiveData<List<MyNotification>> =
-        notificationRepo.allNotifications.asLiveData()
-
+    val allNotifications:LiveData<List<MyNotification>> = filterType.flatMapLatest { filter ->
+        when(getEnumFilterType(filter)){
+            ALL -> notificationRepo.allNotifications
+            PER_HOUR -> notificationRepo.allNotificationsPerHour
+            PER_DAY -> notificationRepo.allNotificationsPerDay
+            PER_MONTH -> notificationRepo.allNotificationsPerMonth
+        }
+    }.asLiveData()
 
     fun insertNotification(notification:MyNotification) =
         viewModelScope.launch(Dispatchers.IO) {
@@ -27,22 +40,28 @@ class NotificationMainViewModel (private val notificationRepo:NotificationMainRe
             notificationRepo.deleteNotification(notification)
         }
 
-    /*
-    private val filterType:MutableStateFlow<Int> = MutableStateFlow( //TODO:Filter settings
-        state.get<Int>(FILTER_TYPES_KEY)?:0
-    )
+    fun deleteAll(){
+        viewModelScope.launch (Dispatchers.IO){
+         notificationRepo.deleteAllNotifications()
+        }
+    }
 
     init {
         viewModelScope.launch {
-            filterType.collect {currentFilter ->
+            filterType.collect { currentFilter ->
                 state.set(FILTER_TYPES_KEY, currentFilter)
             }
         }
     }
 
-    fun setFilter(num:Int){
-        filterType.value = num
-    }*/
+    fun setFilter(type:FilterTypes){
+        filterType.value = type.filter
+      //  SharePref.data = filterType.value TODO
+    }
+
+    fun getFilterTypeVM(): FilterTypes{
+        return getEnumFilterType(filterType.value)
+    }
 
 
     //Factory viewModel implementation for implementing single detailNotification fragment

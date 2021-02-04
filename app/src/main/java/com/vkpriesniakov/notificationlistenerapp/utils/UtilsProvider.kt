@@ -11,10 +11,9 @@ import android.provider.Settings
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
-import android.view.WindowManager
-import android.widget.PopupWindow
 import androidx.activity.result.ActivityResultLauncher
 import com.vkpriesniakov.notificationlistenerapp.R
+import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes
 import java.text.Format
 import java.text.SimpleDateFormat
 import java.util.*
@@ -45,6 +44,29 @@ private const val TAG = "UtilsProvider"
                 }).create().show()
     }
 
+interface OnDeletionClick{
+    fun onDeleteClick()
+}
+
+fun showDeleteDialog(
+    context: Context,
+    listener: OnDeletionClick
+) {
+    val message = "Do you want to delete all Notifications?"
+
+    val alertDialogBuilder = AlertDialog.Builder(context, R.style.AlertDialogCustom)
+        .setTitle("Delete All Notifications")
+        .setMessage(message)
+        .setPositiveButton("Yes",
+            DialogInterface.OnClickListener { dialog, id ->
+                listener.onDeleteClick()
+            })
+        .setNegativeButton("No",
+            DialogInterface.OnClickListener { dialog, id ->
+                dialog.cancel()
+            }).create().show()
+}
+
 
 
 fun isServiceEnabled(context: Context): Boolean {
@@ -68,9 +90,15 @@ fun isServiceEnabled(context: Context): Boolean {
         return false
     }
 
-    fun convertTime(time: Long): String? {
-        val date = Date(time)
-        val format: Format = SimpleDateFormat("yyyy MM dd HH:mm:ss", Locale.getDefault())
+    fun convertTime(time: Long?): String? {
+        val date = time?.let { Date(it) }
+        val format: Format = SimpleDateFormat("HH:mm", Locale.getDefault())
+        return format.format(date)
+    }
+
+    fun convertDate(time: Long?): String? {
+        val date = time?.let { Date(it) }
+        val format: Format = SimpleDateFormat("dd.MM.yy", Locale.getDefault())
         return format.format(date)
     }
 

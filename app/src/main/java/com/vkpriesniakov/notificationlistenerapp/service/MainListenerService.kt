@@ -9,36 +9,75 @@ import android.util.Log
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import java.lang.ref.WeakReference
+import com.vkpriesniakov.notificationlistenerapp.model.MyNotification
 
 
 class MainListenerService : NotificationListenerService() {
 
     private val TAG = "MyNotificationListener"
 
+    private var mn1:MyNotification? = null
+    private var mn2:MyNotification? = null
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
 
         Log.i(TAG, "Got ID ${sbn.id}")
 
-        //TODO: memory leaks spotted. Require refactoring
+        val text = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT).toString()
+        val title = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE).toString()
 
-        startWorker(sbn)
+       if ( text.equals("null") && title.equals("null") ||
+           text.equals(null) && title.equals(null)
+       ){
+           Log.i(TAG, "Got null")
+           return
+       } else{
+           checkForEquals(sbn)
+       }
 
     }
 
-    private fun startWorker(sbn: StatusBarNotification) {
+    private fun checkForEquals(sbn: StatusBarNotification) {
 
-        val title = WeakReference(sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE).toString())
-        val text = WeakReference(sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT).toString())
-        val pckName = WeakReference(sbn.packageName)
-        val date = WeakReference(sbn.postTime)
+        if (mn1 == null){
 
-        val builder = Data.Builder().also {
-            it.putString("title", title.get())
-            it.putString("text", text.get())
-            it.putString("pack", pckName.get())
-            it.putLong("date", date.get()!!)
+            mn1 = MyNotification( ntfId = null,
+                ntfTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE).toString(),
+                ntfMessage =  sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT).toString(),
+                ntfPackage = sbn.packageName,
+                ntfDate = sbn.postTime)
+            buildWork(sbn)
+        } else{
+            mn2 = MyNotification( ntfId = null,
+                ntfTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE).toString(),
+                ntfMessage =  sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT).toString(),
+                ntfPackage = sbn.packageName,
+                ntfDate = sbn.postTime)
+
+            if (mn1!!.ntfTitle.equals(mn2!!.ntfTitle) &&
+                mn1!!.ntfMessage.equals(mn2!!.ntfMessage) &&
+                mn1!!.ntfPackage.equals(mn2!!.ntfPackage)){
+
+                Log.i(TAG, "Equals messages")
+                    return
+            } else  {
+                buildWork(sbn)
+            }
+            mn1 = mn2
+        }
+    }
+
+
+    private fun buildWork(sbn: StatusBarNotification){
+
+        val title = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+        val text = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
+
+        val builder = Data.Builder().apply {
+            putString("title", title as String?)
+            putString("text", text as String?)
+            putString("pack", sbn.packageName)
+            putLong("date", sbn.postTime)
         }
 
         val workManager = WorkManager.getInstance(this)
@@ -46,11 +85,6 @@ class MainListenerService : NotificationListenerService() {
             .setInputData(builder.build())
             .build()
         workManager.enqueue(workRequest)
-
-        title.clear()
-        text.clear()
-        pckName.clear()
-        date.clear()
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {

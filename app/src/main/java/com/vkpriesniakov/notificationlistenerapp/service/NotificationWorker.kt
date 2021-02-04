@@ -10,6 +10,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class NotificationWorker(ctx:Context, params:WorkerParameters) :Worker(ctx, params), KoinComponent{
+    val TAG = "WorkerNotification"
 
     override fun doWork(): Result {
 
@@ -23,6 +24,7 @@ class NotificationWorker(ctx:Context, params:WorkerParameters) :Worker(ctx, para
                 ntfDate = inputData.getLong("date", 0L))
 
             mDao.insertNotification(myNotification)
+            Log.i(TAG, "got : ${inputData.getLong("date", 0L)}")
             Result.success()
         } catch (throwable: Throwable) {
             Log.e("workerLog", "Error applying blur", throwable)

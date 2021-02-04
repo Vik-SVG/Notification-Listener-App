@@ -20,4 +20,10 @@ interface NotificationDao {
     @Delete
     fun deleteNotification(myNotification: MyNotification)
 
+    @Query("DELETE FROM $DATABASE_NAME")
+    fun deleteAllNotifications()
+
+    @Query("SELECT * FROM $DATABASE_NAME WHERE ntfDate/1000 >= (strftime('%s', 'now') - :timeFilter) ORDER BY ntfDate DESC")
+    fun getNotificationsByFilter(timeFilter:Long): Flow<List<MyNotification>>
+
 }
