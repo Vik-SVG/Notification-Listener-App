@@ -2,11 +2,9 @@ package com.vkpriesniakov.notificationlistenerapp.sharedpreferences
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.emptyPreferences
-import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.createDataStore
+import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -17,7 +15,7 @@ class PreferencesRepository(val context: Context) {
      val dataStore: DataStore<Preferences> = context.createDataStore(name = "Filter")
 
      object PreferencesKeys {
-        val CHOSEN_FILTER = intPreferencesKey("chosen_filter")
+        val CHOSEN_FILTER = stringPreferencesKey("chosen_string_filter")
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data.catch { exception ->
@@ -27,17 +25,17 @@ class PreferencesRepository(val context: Context) {
             throw exception
         }
     }.map { preferences ->
-        val choseFilter = preferences[PreferencesKeys.CHOSEN_FILTER] ?: 0
+        val choseFilter = preferences[PreferencesKeys.CHOSEN_FILTER] ?: FilterTypes.ALL.name
         UserPreferences(choseFilter)
     }
 
-    suspend fun updateChosenFilter(filter:Int){
+    suspend fun updateChosenFilter(filter:FilterTypes){
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.CHOSEN_FILTER] = filter
+            preferences[PreferencesKeys.CHOSEN_FILTER] = filter.name
         }
     }
 
 }
 
 
-data class UserPreferences(val filterType: Int)
+data class UserPreferences(val filterType: String)

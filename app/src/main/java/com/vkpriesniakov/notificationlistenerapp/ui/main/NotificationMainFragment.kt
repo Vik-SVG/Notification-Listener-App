@@ -112,7 +112,7 @@ class NotificationMainFragment : Fragment() {
         mPopup =
             CustomPopup(
                 inflater,
-                FilterTypes.getEnumFilterType(mViewModel.currentPopupFilter),
+                mViewModel.currentPopupFilter,
                 object : CustomPopup.OnFilterClick {
                     override fun onFilterClick(filterType: FilterTypes) {
                         mViewModel.setFilter(filterType)

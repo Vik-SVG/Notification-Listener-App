@@ -39,7 +39,7 @@ open class SwipeToDeleteCallback(context:Context):ItemTouchHelper.SimpleCallback
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        TODO("Not yet implemented")
+
     }
 
     //delete VIew

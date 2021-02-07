@@ -3,25 +3,21 @@ package com.vkpriesniakov.notificationlistenerapp.ui.main
 import androidx.lifecycle.*
 import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes
 import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes.*
-import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes.Companion.getEnumFilterType
 import com.vkpriesniakov.notificationlistenerapp.model.MyNotification
 import com.vkpriesniakov.notificationlistenerapp.sharedpreferences.PreferencesRepository
 import com.vkpriesniakov.notificationlistenerapp.sharedpreferences.UserPreferences
 import com.vkpriesniakov.notificationlistenerapp.utils.DAY_MS
-import com.vkpriesniakov.notificationlistenerapp.utils.FILTER_TYPES_KEY
 import com.vkpriesniakov.notificationlistenerapp.utils.HOUR_MS
 import com.vkpriesniakov.notificationlistenerapp.utils.MONT_MS
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import java.util.*
 
 data class NotificationsUiModel(
     val allNotifications: List<MyNotification>,
-    val filterOrder: Int
+    val filterOrder: String
 )
 
 class NotificationMainViewModel(
@@ -47,29 +43,28 @@ class NotificationMainViewModel(
 
     private fun filterAllNotifications(
         notifications: List<MyNotification>,
-        filterType: Int
+        filterType: String
     ): List<MyNotification> {
-        val filteredNotif = when(filterType){
-            0 ->notifications
-            1 ->notifications.filter { it.ntfDate!! >= System.currentTimeMillis() - HOUR_MS}
-            2 ->notifications.filter { it.ntfDate!! >= System.currentTimeMillis() - DAY_MS }
-            3 ->notifications.filter {  it.ntfDate!! >= System.currentTimeMillis() - MONT_MS }
-            else -> notifications
+        return when(filterType){
+            ALL.name -> notifications.sortedByDescending { it.ntfDate }
+            PER_HOUR.name ->notifications.filter { it.ntfDate!! >= Date().time - HOUR_MS}.sortedByDescending { it.ntfDate }
+            PER_DAY.name ->notifications.filter { it.ntfDate!! >= Date().time - DAY_MS }.sortedByDescending { it.ntfDate }
+            PER_MONTH.name ->notifications.filter {  it.ntfDate!! >= Date().time - MONT_MS }.sortedByDescending { it.ntfDate }
+            else -> notifications.sortedByDescending { it.ntfDate }
         }
-        return filteredNotif
     }
 
     fun setFilter(type: FilterTypes) {
         viewModelScope.launch {
-            userPreferencesRepo.updateChosenFilter(type.filter)
+            userPreferencesRepo.updateChosenFilter(type)
         }
     }
 
-    var currentPopupFilter = 0
+    var currentPopupFilter:FilterTypes = FilterTypes.valueOf("ALL")
 
     init {
         viewModelScope.launch {
-            userPreferencesFlow.collect { currentPopupFilter = it.filterType }
+            userPreferencesFlow.collect { currentPopupFilter = FilterTypes.valueOf(it.filterType)}
         }
     }
 
