@@ -10,3 +10,7 @@ const val FILTER_TYPES_KEY ="FILTER_TYPES_KEY"
 const val HOUR_SEC:Long = 60*60
 const val DAY_SEC:Long = 24*60*60
 const val MONT_SEC:Long = 30*24*60*60
+
+const val HOUR_MS:Long = 60*60*1000L
+const val DAY_MS:Long = 24*60*60*1000L
+const val MONT_MS:Long = 30*24*60*60*1000L

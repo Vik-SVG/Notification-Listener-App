@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.IBinder
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.text.SpannableString
 import android.util.Log
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
@@ -71,7 +72,11 @@ class MainListenerService : NotificationListenerService() {
     private fun buildWork(sbn: StatusBarNotification){
 
         val title = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
-        val text = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
+        var text = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
+
+        if (text is SpannableString){
+            text = text.toString()
+        }
 
         val builder = Data.Builder().apply {
             putString("title", title as String?)

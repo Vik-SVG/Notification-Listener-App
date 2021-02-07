@@ -5,79 +5,106 @@ import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes
 import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes.*
 import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes.Companion.getEnumFilterType
 import com.vkpriesniakov.notificationlistenerapp.model.MyNotification
+import com.vkpriesniakov.notificationlistenerapp.sharedpreferences.PreferencesRepository
+import com.vkpriesniakov.notificationlistenerapp.sharedpreferences.UserPreferences
+import com.vkpriesniakov.notificationlistenerapp.utils.DAY_MS
 import com.vkpriesniakov.notificationlistenerapp.utils.FILTER_TYPES_KEY
-import com.vkpriesniakov.notificationlistenerapp.utils.HOUR_SEC
+import com.vkpriesniakov.notificationlistenerapp.utils.HOUR_MS
+import com.vkpriesniakov.notificationlistenerapp.utils.MONT_MS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
+import java.util.*
 
-class NotificationMainViewModel (private val notificationRepo:NotificationMainRepository,
-                                 private val state: SavedStateHandle
-                                 ): ViewModel() {
+data class NotificationsUiModel(
+    val allNotifications: List<MyNotification>,
+    val filterOrder: Int
+)
 
-    private val filterType: MutableStateFlow<Int> = MutableStateFlow(
-        state.get<Int>(FILTER_TYPES_KEY)?:0 //  TODO:Filter getFromSPref
-    )
+class NotificationMainViewModel(
+    private val notificationRepo: NotificationMainRepository,
+    private val userPreferencesRepo: PreferencesRepository
+) : ViewModel() {
 
-    val allNotifications:LiveData<List<MyNotification>> = filterType.flatMapLatest { filter ->
-        when(getEnumFilterType(filter)){
-            ALL -> notificationRepo.allNotifications
-            PER_HOUR -> notificationRepo.allNotificationsPerHour
-            PER_DAY -> notificationRepo.allNotificationsPerDay
-            PER_MONTH -> notificationRepo.allNotificationsPerMonth
-        }
+    private val userPreferencesFlow = userPreferencesRepo.userPreferencesFlow
+
+    val allNotificationsModelFlow = combine(
+        notificationRepo.allNotifications,
+        userPreferencesFlow
+    ) { allNotifications: List<MyNotification>, userPref: UserPreferences ->
+        return@combine NotificationsUiModel(
+            allNotifications = filterAllNotifications(
+                allNotifications,
+                userPref.filterType
+            ),
+            filterOrder = userPref.filterType
+        )
     }.asLiveData()
 
-    fun insertNotification(notification:MyNotification) =
+
+    private fun filterAllNotifications(
+        notifications: List<MyNotification>,
+        filterType: Int
+    ): List<MyNotification> {
+        val filteredNotif = when(filterType){
+            0 ->notifications
+            1 ->notifications.filter { it.ntfDate!! >= System.currentTimeMillis() - HOUR_MS}
+            2 ->notifications.filter { it.ntfDate!! >= System.currentTimeMillis() - DAY_MS }
+            3 ->notifications.filter {  it.ntfDate!! >= System.currentTimeMillis() - MONT_MS }
+            else -> notifications
+        }
+        return filteredNotif
+    }
+
+    fun setFilter(type: FilterTypes) {
+        viewModelScope.launch {
+            userPreferencesRepo.updateChosenFilter(type.filter)
+        }
+    }
+
+    var currentPopupFilter = 0
+
+    init {
+        viewModelScope.launch {
+            userPreferencesFlow.collect { currentPopupFilter = it.filterType }
+        }
+    }
+
+
+    fun insertNotification(notification: MyNotification) =
         viewModelScope.launch(Dispatchers.IO) {
             notificationRepo.insertNotification(notification)
         }
 
-    fun deleteNotification(notification:MyNotification) =
-        viewModelScope.launch (Dispatchers.IO){
+    fun deleteNotification(notification: MyNotification) =
+        viewModelScope.launch(Dispatchers.IO) {
             notificationRepo.deleteNotification(notification)
         }
 
-    fun deleteAll(){
-        viewModelScope.launch (Dispatchers.IO){
-         notificationRepo.deleteAllNotifications()
+    fun deleteAll() {
+        viewModelScope.launch(Dispatchers.IO) {
+            notificationRepo.deleteAllNotifications()
         }
     }
-
-    init {
-        viewModelScope.launch {
-            filterType.collect { currentFilter ->
-                state.set(FILTER_TYPES_KEY, currentFilter)
-            }
-        }
-    }
-
-    fun setFilter(type:FilterTypes){
-        filterType.value = type.filter
-      //  SharePref.data = filterType.value TODO
-    }
-
-    fun getFilterTypeVM(): FilterTypes{
-        return getEnumFilterType(filterType.value)
-    }
-
 
     //Factory viewModel implementation for implementing single detailNotification fragment
     //In current version is unnecessarily
-    interface AssistedFactory{
-        fun create():NotificationMainViewModel
+    interface AssistedFactory {
+        fun create(): NotificationMainViewModel
     }
 
-    companion object{
-        fun provideFactory( assistedFactory:AssistedFactory):ViewModelProvider.Factory = object:ViewModelProvider.Factory{
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                @Suppress("UNCHECKED_CAST")
-                return assistedFactory.create() as T
-            }
+    companion object {
+        fun provideFactory(assistedFactory: AssistedFactory): ViewModelProvider.Factory =
+            object : ViewModelProvider.Factory {
+                override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                    @Suppress("UNCHECKED_CAST")
+                    return assistedFactory.create() as T
+                }
 
-        }
+            }
     }
 
 }

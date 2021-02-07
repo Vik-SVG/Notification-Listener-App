@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.vkpriesniakov.notificationlistenerapp.persistence.AppDatabase
 import com.vkpriesniakov.notificationlistenerapp.persistence.NotificationDao
+import com.vkpriesniakov.notificationlistenerapp.sharedpreferences.PreferencesRepository
 import com.vkpriesniakov.notificationlistenerapp.ui.main.NotificationMainRepository
 import com.vkpriesniakov.notificationlistenerapp.ui.main.NotificationMainViewModel
 import org.koin.android.ext.koin.androidApplication
+import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -38,7 +40,7 @@ val myDatabaseModules = module {
 
     val viewModelModule = module{
 
-        single { SavedStateHandle() }
+        single { PreferencesRepository(androidContext()) }
         viewModel { NotificationMainViewModel(get (), get()) }
 
     }

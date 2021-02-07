@@ -7,11 +7,14 @@ import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.vkpriesniakov.notificationlistenerapp.R
 import com.vkpriesniakov.notificationlistenerapp.adapters.NotificationRVAdapter
 import com.vkpriesniakov.notificationlistenerapp.databinding.MainFragmentBinding
 import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes
+import com.vkpriesniakov.notificationlistenerapp.swipe_to_delete.SwipeToDeleteCallback
 import com.vkpriesniakov.notificationlistenerapp.utils.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -63,40 +66,62 @@ class NotificationMainFragment : Fragment() {
 
     private fun setupRecyclerView() {
         mAdapter = NotificationRVAdapter(activity as AppCompatActivity)
+
         bdn.rvMain.apply {
             layoutManager = LinearLayoutManager(requireContext())
             setHasFixedSize(true)
             adapter = mAdapter
         }
+
+        val swipeHandler = object : SwipeToDeleteCallback(context as Context) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+
+                mViewModel.deleteNotification(
+                    mAdapter.allNotifications[viewHolder.adapterPosition]
+                )
+                mAdapter.removeAt(viewHolder.adapterPosition)
+            }
+        }
+
+
+        val itemTouchHelper = ItemTouchHelper(swipeHandler)
+        itemTouchHelper.attachToRecyclerView(bdn.rvMain)
+
         subscribeUI(mAdapter)
+    }
+
+    private fun subscribeUI(adapter: NotificationRVAdapter) {
+
+        mViewModel.allNotificationsModelFlow.observe(viewLifecycleOwner) { notif ->
+            adapter.setNotifications(notif.allNotifications)
+
+            //setupPopup
+
+            if (notif.allNotifications.isNotEmpty()) {
+                bdn.imgEmptyNotifications.visibility = View.GONE
+                bdn.txtNoNotification.visibility = View.GONE
+            } else {
+                bdn.imgEmptyNotifications.visibility = View.VISIBLE
+                bdn.txtNoNotification.visibility = View.VISIBLE
+            }
+        }
+
     }
 
     private fun setupPopupMenu(inflater: LayoutInflater) {
         mPopup =
-            CustomPopup(inflater, mViewModel.getFilterTypeVM(), object : CustomPopup.OnFilterClick {
-                override fun onFilterClick(filterType: FilterTypes) {
-                    mViewModel.setFilter(filterType)
+            CustomPopup(
+                inflater,
+                FilterTypes.getEnumFilterType(mViewModel.currentPopupFilter),
+                object : CustomPopup.OnFilterClick {
+                    override fun onFilterClick(filterType: FilterTypes) {
+                        mViewModel.setFilter(filterType)
+                    }
                 }
-            }).also {
+            ).also {
                 it.setPopupListeners()
+                Log.i(TAG, "Set new popup ")
             }
-    }
-
-    private fun subscribeUI(adapter: NotificationRVAdapter) {
-        mViewModel.allNotifications.observe(viewLifecycleOwner) { notifications ->
-            notifications.let {
-                adapter.setNotifications(notifications)
-                Log.i(TAG, "Got ${notifications.size} notifications")
-                if (notifications.isNotEmpty()) {
-                    bdn.imgEmptyNotifications.visibility = View.GONE
-                    bdn.txtNoNotification.visibility = View.GONE
-                } else {
-                    bdn.imgEmptyNotifications.visibility = View.VISIBLE
-                    bdn.txtNoNotification.visibility = View.VISIBLE
-                }
-
-            }
-        }
     }
 
     private fun setupStartButton() {
@@ -121,15 +146,16 @@ class NotificationMainFragment : Fragment() {
         return when (item.itemId) {
             R.id.settings_menu -> {
                 mPopup.showPopup()
-                Log.i(TAG, "Current filter is: ${mViewModel.getFilterTypeVM().filter}")
+                Log.i(TAG, "Current filter is: ")
                 return true
             }
-            R.id.delete_all ->{
-                showDeleteDialog(context as Context, object : OnDeletionClick{
+            R.id.delete_all -> {
+                showDeleteDialog(context as Context, object : OnDeletionClick {
                     override fun onDeleteClick() {
-                        //mViewModel.deleteAll()
+                        mViewModel.deleteAll()
                         Log.i(TAG, "Delete All")
-                    }})
+                    }
+                })
                 return true
             }
             else -> {

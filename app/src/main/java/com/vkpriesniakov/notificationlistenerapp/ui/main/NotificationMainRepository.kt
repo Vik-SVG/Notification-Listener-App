@@ -5,6 +5,7 @@ import com.vkpriesniakov.notificationlistenerapp.model.MyNotification
 import com.vkpriesniakov.notificationlistenerapp.persistence.NotificationDao
 import com.vkpriesniakov.notificationlistenerapp.utils.DAY_SEC
 import com.vkpriesniakov.notificationlistenerapp.utils.HOUR_SEC
+import com.vkpriesniakov.notificationlistenerapp.utils.MONT_SEC
 import kotlinx.coroutines.flow.Flow
 
 interface NotificationMainInterface{
@@ -30,7 +31,7 @@ class NotificationMainRepository(private val database: NotificationDao) :Notific
 
     val allNotificationsPerDay = database.getNotificationsByFilter(DAY_SEC)
 
-    val allNotificationsPerMonth = database.getNotificationsByFilter(DAY_SEC)
+    val allNotificationsPerMonth = database.getNotificationsByFilter(MONT_SEC)
 
     override suspend fun getAllNotificationsList(): Flow<List<MyNotification>> = database.getAllNotificationsList()
 

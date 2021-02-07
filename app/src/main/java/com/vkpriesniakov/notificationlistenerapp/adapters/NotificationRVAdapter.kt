@@ -8,27 +8,28 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.vkpriesniakov.notificationlistenerapp.R
 import com.vkpriesniakov.notificationlistenerapp.databinding.NotificationCardBinding
-import com.vkpriesniakov.notificationlistenerapp.model.FilterTypes
 import com.vkpriesniakov.notificationlistenerapp.model.MyNotification
-import com.vkpriesniakov.notificationlistenerapp.ui.main.NotificationMainFragment
 import com.vkpriesniakov.notificationlistenerapp.utils.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class NotificationRVAdapter(val mContext: Context) :
     RecyclerView.Adapter<NotificationRVAdapter.NotificationViewHolder>() {
 
     private val inflater: LayoutInflater = LayoutInflater.from(mContext)
-     var allNotifications = emptyList<MyNotification>()
+    var allNotifications = mutableListOf<MyNotification>()
+
+    fun removeAt(position: Int) {
+        allNotifications.removeAt(position)
+        notifyItemRemoved(position)
+        Log.i("RemovedAtAdapter", "Removed $position")
+    }
 
     internal fun setNotifications(notifications: List<MyNotification>) {
-        this.allNotifications = notifications
+        this.allNotifications = notifications.toMutableList()
         notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NotificationViewHolder {
         val bdn = NotificationCardBinding.inflate(inflater, parent, false)
-
         return NotificationViewHolder(bdn)
     }
 

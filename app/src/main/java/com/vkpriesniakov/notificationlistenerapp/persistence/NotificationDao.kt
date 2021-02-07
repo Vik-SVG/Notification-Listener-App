@@ -25,5 +25,4 @@ interface NotificationDao {
 
     @Query("SELECT * FROM $DATABASE_NAME WHERE ntfDate/1000 >= (strftime('%s', 'now') - :timeFilter) ORDER BY ntfDate DESC")
     fun getNotificationsByFilter(timeFilter:Long): Flow<List<MyNotification>>
-
 }
