@@ -146,7 +146,7 @@ class NotificationMainFragment : Fragment() {
         return when (item.itemId) {
             R.id.settings_menu -> {
                 mPopup.showPopup()
-                Log.i(TAG, "Current filter is: ")
+               // Log.i(TAG, "Current filter is: ")
                 return true
             }
             R.id.delete_all -> {
