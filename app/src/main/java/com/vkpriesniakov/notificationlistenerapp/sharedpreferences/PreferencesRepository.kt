@@ -12,7 +12,7 @@ import java.io.IOException
 
 class PreferencesRepository(val context: Context) {
 
-     val dataStore: DataStore<Preferences> = context.createDataStore(name = "Filter")
+     private val dataStore: DataStore<Preferences> = context.createDataStore(name = "Filter")
 
      object PreferencesKeys {
         val CHOSEN_FILTER = stringPreferencesKey("chosen_string_filter")

@@ -60,14 +60,6 @@ class NotificationMainViewModel(
         }
     }
 
-    var currentPopupFilter:FilterTypes = FilterTypes.valueOf("ALL")
-
-    init {
-        viewModelScope.launch {
-            userPreferencesFlow.collect { currentPopupFilter = FilterTypes.valueOf(it.filterType)}
-        }
-    }
-
 
     fun insertNotification(notification: MyNotification) =
         viewModelScope.launch(Dispatchers.IO) {

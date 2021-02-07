@@ -50,7 +50,6 @@ class NotificationMainFragment : Fragment() {
         val view = bdn.root
 
         setupRecyclerView()
-        setupPopupMenu(inflater)
         setHasOptionsMenu(true)
 
         ((activity as AppCompatActivity)).setSupportActionBar(bdn.includeAppbar.myToolbar)
@@ -95,7 +94,7 @@ class NotificationMainFragment : Fragment() {
         mViewModel.allNotificationsModelFlow.observe(viewLifecycleOwner) { notif ->
             adapter.setNotifications(notif.allNotifications)
 
-            //setupPopup
+            setupPopupMenu(activity?.layoutInflater as LayoutInflater, FilterTypes.valueOf(notif.filterOrder))
 
             if (notif.allNotifications.isNotEmpty()) {
                 bdn.imgEmptyNotifications.visibility = View.GONE
@@ -105,14 +104,13 @@ class NotificationMainFragment : Fragment() {
                 bdn.txtNoNotification.visibility = View.VISIBLE
             }
         }
-
     }
 
-    private fun setupPopupMenu(inflater: LayoutInflater) {
+    private fun setupPopupMenu(inflater: LayoutInflater, filterType:FilterTypes) {
         mPopup =
             CustomPopup(
                 inflater,
-                mViewModel.currentPopupFilter,
+                filterType,
                 object : CustomPopup.OnFilterClick {
                     override fun onFilterClick(filterType: FilterTypes) {
                         mViewModel.setFilter(filterType)
