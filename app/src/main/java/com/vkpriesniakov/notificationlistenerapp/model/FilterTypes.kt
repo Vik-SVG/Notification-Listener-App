@@ -1,6 +1,6 @@
 package com.vkpriesniakov.notificationlistenerapp.model
 
-enum  class FilterTypes {
+enum class FilterTypes {
 
     ALL,
     PER_HOUR,

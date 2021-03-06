@@ -10,7 +10,6 @@ import com.vkpriesniakov.notificationlistenerapp.utils.DAY_MS
 import com.vkpriesniakov.notificationlistenerapp.utils.HOUR_MS
 import com.vkpriesniakov.notificationlistenerapp.utils.MONT_MS
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.util.*
@@ -45,11 +44,14 @@ class NotificationMainViewModel(
         notifications: List<MyNotification>,
         filterType: String
     ): List<MyNotification> {
-        return when(filterType){
+        return when (filterType) {
             ALL.name -> notifications.sortedByDescending { it.ntfDate }
-            PER_HOUR.name ->notifications.filter { it.ntfDate!! >= Date().time - HOUR_MS}.sortedByDescending { it.ntfDate }
-            PER_DAY.name ->notifications.filter { it.ntfDate!! >= Date().time - DAY_MS }.sortedByDescending { it.ntfDate }
-            PER_MONTH.name ->notifications.filter {  it.ntfDate!! >= Date().time - MONT_MS }.sortedByDescending { it.ntfDate }
+            PER_HOUR.name -> notifications.filter { it.ntfDate!! >= Date().time - HOUR_MS }
+                .sortedByDescending { it.ntfDate }
+            PER_DAY.name -> notifications.filter { it.ntfDate!! >= Date().time - DAY_MS }
+                .sortedByDescending { it.ntfDate }
+            PER_MONTH.name -> notifications.filter { it.ntfDate!! >= Date().time - MONT_MS }
+                .sortedByDescending { it.ntfDate }
             else -> notifications.sortedByDescending { it.ntfDate }
         }
     }

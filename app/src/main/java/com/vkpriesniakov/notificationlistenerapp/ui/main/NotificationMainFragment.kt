@@ -94,7 +94,10 @@ class NotificationMainFragment : Fragment() {
         mViewModel.allNotificationsModelFlow.observe(viewLifecycleOwner) { notif ->
             adapter.setNotifications(notif.allNotifications)
 
-            setupPopupMenu(activity?.layoutInflater as LayoutInflater, FilterTypes.valueOf(notif.filterOrder))
+            setupPopupMenu(
+                activity?.layoutInflater as LayoutInflater,
+                FilterTypes.valueOf(notif.filterOrder)
+            )
 
             if (notif.allNotifications.isNotEmpty()) {
                 bdn.imgEmptyNotifications.visibility = View.GONE
@@ -106,7 +109,7 @@ class NotificationMainFragment : Fragment() {
         }
     }
 
-    private fun setupPopupMenu(inflater: LayoutInflater, filterType:FilterTypes) {
+    private fun setupPopupMenu(inflater: LayoutInflater, filterType: FilterTypes) {
         mPopup =
             CustomPopup(
                 inflater,
@@ -144,7 +147,7 @@ class NotificationMainFragment : Fragment() {
         return when (item.itemId) {
             R.id.settings_menu -> {
                 mPopup.showPopup()
-               // Log.i(TAG, "Current filter is: ")
+                // Log.i(TAG, "Current filter is: ")
                 return true
             }
             R.id.delete_all -> {

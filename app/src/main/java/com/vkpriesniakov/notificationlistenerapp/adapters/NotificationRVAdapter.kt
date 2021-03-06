@@ -10,6 +10,7 @@ import com.vkpriesniakov.notificationlistenerapp.R
 import com.vkpriesniakov.notificationlistenerapp.databinding.NotificationCardBinding
 import com.vkpriesniakov.notificationlistenerapp.model.MyNotification
 import com.vkpriesniakov.notificationlistenerapp.utils.*
+import java.lang.reflect.InvocationTargetException
 
 class NotificationRVAdapter(val mContext: Context) :
     RecyclerView.Adapter<NotificationRVAdapter.NotificationViewHolder>() {
@@ -46,7 +47,19 @@ class NotificationRVAdapter(val mContext: Context) :
             val packageName = allNotifications[position].ntfPackage
 
             val iconApp = packageName?.let {
-                getNotificationIcon(mContext, it)
+
+                //TODO: getIcon from cached directory
+                //if null, getNotification
+                try {
+                    getNotificationIcon(mContext, it)
+                } catch (e: InvocationTargetException) {
+                    e.cause?.printStackTrace()
+                    mContext.getDrawable(R.drawable.ic_none_notification)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    mContext.getDrawable(R.drawable.ic_none_notification)
+                }
+
             }
 
             Glide.with(mContext).load((iconApp)).placeholder(R.color.darker_grey)

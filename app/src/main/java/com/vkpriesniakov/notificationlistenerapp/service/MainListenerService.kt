@@ -17,8 +17,8 @@ class MainListenerService : NotificationListenerService() {
 
     private val TAG = "MyNotificationListener"
 
-    private var mn1:MyNotification? = null
-    private var mn2:MyNotification? = null
+    private var mFirstIncomingNotification: MyNotification? = null
+    private var mSecondIncomingNotification: MyNotification? = null
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
 
@@ -27,54 +27,63 @@ class MainListenerService : NotificationListenerService() {
         val text = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT).toString()
         val title = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE).toString()
 
-       if ( text.equals("null") && title.equals("null") ||
-           text.equals(null) && title.equals(null)
-       ){
-           Log.i(TAG, "Got null")
-           return
-       } else{
-           checkForEquals(sbn)
-       }
+        if (text.equals("null") && title.equals("null") ||
+            text.equals(null) && title.equals(null)
+        ) {
+            Log.i(TAG, "Got null")
+            return
+        } else {
+            checkForEquals(sbn)
+        }
 
     }
 
     private fun checkForEquals(sbn: StatusBarNotification) {
 
-        if (mn1 == null){
+        if (mFirstIncomingNotification == null) {
 
-            mn1 = MyNotification( ntfId = null,
-                ntfTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE).toString(),
-                ntfMessage =  sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT).toString(),
+            mFirstIncomingNotification = MyNotification(
+                ntfId = null,
+                ntfTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+                    .toString(),
+                ntfMessage = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
+                    .toString(),
                 ntfPackage = sbn.packageName,
-                ntfDate = sbn.postTime)
+                ntfDate = sbn.postTime
+            )
             buildWork(sbn)
-        } else{
-            mn2 = MyNotification( ntfId = null,
-                ntfTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE).toString(),
-                ntfMessage =  sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT).toString(),
+        } else {
+            mSecondIncomingNotification = MyNotification(
+                ntfId = null,
+                ntfTitle = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
+                    .toString(),
+                ntfMessage = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
+                    .toString(),
                 ntfPackage = sbn.packageName,
-                ntfDate = sbn.postTime)
+                ntfDate = sbn.postTime
+            )
 
-            if (mn1!!.ntfTitle.equals(mn2!!.ntfTitle) &&
-                mn1!!.ntfMessage.equals(mn2!!.ntfMessage) &&
-                mn1!!.ntfPackage.equals(mn2!!.ntfPackage)){
+            if (mFirstIncomingNotification!!.ntfTitle.equals(mSecondIncomingNotification!!.ntfTitle) &&
+                mFirstIncomingNotification!!.ntfMessage.equals(mSecondIncomingNotification!!.ntfMessage) &&
+                mFirstIncomingNotification!!.ntfPackage.equals(mSecondIncomingNotification!!.ntfPackage)
+            ) {
 
                 Log.i(TAG, "Equals messages")
-                    return
-            } else  {
+                return
+            } else {
                 buildWork(sbn)
             }
-            mn1 = mn2
+            mFirstIncomingNotification = mSecondIncomingNotification
         }
     }
 
 
-    private fun buildWork(sbn: StatusBarNotification){
+    private fun buildWork(sbn: StatusBarNotification) {
 
         val title = sbn.notification.extras.getCharSequence(Notification.EXTRA_TITLE)
         var text = sbn.notification.extras.getCharSequence(Notification.EXTRA_TEXT)
 
-        if (text is SpannableString){
+        if (text is SpannableString) {
             text = text.toString()
         }
 

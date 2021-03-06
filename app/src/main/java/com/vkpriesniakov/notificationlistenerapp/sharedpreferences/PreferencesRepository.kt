@@ -12,9 +12,9 @@ import java.io.IOException
 
 class PreferencesRepository(val context: Context) {
 
-     private val dataStore: DataStore<Preferences> = context.createDataStore(name = "Filter")
+    private val dataStore: DataStore<Preferences> = context.createDataStore(name = "Filter")
 
-     object PreferencesKeys {
+    object PreferencesKeys {
         val CHOSEN_FILTER = stringPreferencesKey("chosen_string_filter")
     }
 
@@ -29,13 +29,12 @@ class PreferencesRepository(val context: Context) {
         UserPreferences(choseFilter)
     }
 
-    suspend fun updateChosenFilter(filter:FilterTypes){
+    suspend fun updateChosenFilter(filter: FilterTypes) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.CHOSEN_FILTER] = filter.name
         }
     }
 
 }
-
 
 data class UserPreferences(val filterType: String)

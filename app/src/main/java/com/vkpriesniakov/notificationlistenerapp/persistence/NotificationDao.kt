@@ -12,7 +12,7 @@ interface NotificationDao {
     fun getAllNotificationsList(): Flow<List<MyNotification>>
 
     @Query("SELECT * FROM $DATABASE_NAME WHERE ntfId = :notificationId")
-    fun getNotificationById(notificationId:String):Flow<MyNotification>
+    fun getNotificationById(notificationId: String): Flow<MyNotification>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertNotification(vararg myNotification: MyNotification)
@@ -24,5 +24,5 @@ interface NotificationDao {
     fun deleteAllNotifications()
 
     @Query("SELECT * FROM $DATABASE_NAME WHERE ntfDate/1000 >= (strftime('%s', 'now') - :timeFilter) ORDER BY ntfDate DESC")
-    fun getNotificationsByFilter(timeFilter:Long): Flow<List<MyNotification>>
+    fun getNotificationsByFilter(timeFilter: Long): Flow<List<MyNotification>>
 }

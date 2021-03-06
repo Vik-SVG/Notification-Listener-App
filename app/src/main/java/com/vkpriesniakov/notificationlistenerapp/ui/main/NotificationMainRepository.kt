@@ -8,11 +8,11 @@ import com.vkpriesniakov.notificationlistenerapp.utils.HOUR_SEC
 import com.vkpriesniakov.notificationlistenerapp.utils.MONT_SEC
 import kotlinx.coroutines.flow.Flow
 
-interface NotificationMainInterface{
+interface NotificationMainInterface {
 
     suspend fun getAllNotificationsList(): Flow<List<MyNotification>>
 
-    suspend fun getNotificationById(notificationId:String):Flow<MyNotification>
+    suspend fun getNotificationById(notificationId: String): Flow<MyNotification>
 
     suspend fun insertNotification(myNotification: MyNotification)
 
@@ -23,7 +23,8 @@ interface NotificationMainInterface{
 }
 
 
-class NotificationMainRepository(private val database: NotificationDao) :NotificationMainInterface{
+class NotificationMainRepository(private val database: NotificationDao) :
+    NotificationMainInterface {
 
     val allNotifications = database.getAllNotificationsList()
 
@@ -33,14 +34,20 @@ class NotificationMainRepository(private val database: NotificationDao) :Notific
 
     val allNotificationsPerMonth = database.getNotificationsByFilter(MONT_SEC)
 
-    override suspend fun getAllNotificationsList(): Flow<List<MyNotification>> = database.getAllNotificationsList()
+    override suspend fun getAllNotificationsList(): Flow<List<MyNotification>> =
+        database.getAllNotificationsList()
 
-    override suspend fun getNotificationById(notificationId: String): Flow<MyNotification> = database.getNotificationById(notificationId)
+    override suspend fun getNotificationById(notificationId: String): Flow<MyNotification> =
+        database.getNotificationById(notificationId)
 
-    override suspend fun insertNotification(myNotification: MyNotification) = database.insertNotification(myNotification)
+    override suspend fun insertNotification(myNotification: MyNotification) =
+        database.insertNotification(myNotification)
 
-    override suspend fun deleteNotification(myNotification: MyNotification) = database.deleteNotification(myNotification)
+    override suspend fun deleteNotification(myNotification: MyNotification) =
+        database.deleteNotification(myNotification)
 
-    override suspend fun deleteAllNotifications() { database.deleteAllNotifications()}
+    override suspend fun deleteAllNotifications() {
+        database.deleteAllNotifications()
+    }
 
 }

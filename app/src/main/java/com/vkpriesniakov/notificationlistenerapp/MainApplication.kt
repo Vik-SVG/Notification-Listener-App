@@ -8,7 +8,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
-class MainApplication:Application() {
+class MainApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
@@ -19,7 +19,8 @@ class MainApplication:Application() {
             //inject Android context
             androidContext(this@MainApplication)
             // use modules
-            modules(myDatabaseModules,
+            modules(
+                myDatabaseModules,
                 repositoryModule,
                 viewModelModule
             )

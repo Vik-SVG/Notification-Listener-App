@@ -8,9 +8,11 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.vkpriesniakov.notificationlistenerapp.R
 
-open class SwipeToDeleteCallback(context:Context):ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+open class SwipeToDeleteCallback(context: Context) :
+    ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
 
-    private val deleteIcon = ContextCompat.getDrawable(context, R.drawable.ic_delete_with_swipe_icon)
+    private val deleteIcon =
+        ContextCompat.getDrawable(context, R.drawable.ic_delete_with_swipe_icon)
     private val intrinsicWidth = deleteIcon?.intrinsicWidth
     private val intrinsicHeight = deleteIcon?.intrinsicHeight
     private val background = ColorDrawable()
@@ -58,7 +60,13 @@ open class SwipeToDeleteCallback(context:Context):ItemTouchHelper.SimpleCallback
         val isCanceled = dX == 0f && !isCurrentlyActive
 
         if (isCanceled) {
-            clearCanvas(c, itemView.right + dX, itemView.top.toFloat(), itemView.right.toFloat(), itemView.bottom.toFloat())
+            clearCanvas(
+                c,
+                itemView.right + dX,
+                itemView.top.toFloat(),
+                itemView.right.toFloat(),
+                itemView.bottom.toFloat()
+            )
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
             return
         }
